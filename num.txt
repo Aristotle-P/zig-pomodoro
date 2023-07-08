@@ -1,0 +1,44 @@
+   .;,.
+ .':cc,
+ 'cccc,
+ ,cccc,
+ ,cccc'
+.;cccc'
+.;cccc.
+.;ccc:.
+ .';c:.
+    .. 
+    .. 
+.',;:;.
+'clcc:.
+'cccc;.
+,cccc;.
+,cccc,.
+,cccc,.
+,cccc, 
+,cccc' 
+.,cc:. 
+  .'.  
+
+   ...''''''''....     
+   .;ccccccccccc;..,,. 
+     ..',,,,,,,'.':cc;.
+                .:ccc:.
+                .cccc;.
+                'cccc;.
+                'cccc,.
+                ,cccc, 
+                ,cccc' 
+      ...........';cc' 
+   .';cccccccccc;'...  
+ ...'',;;;;::::;,'.    
+'cc:,.                 
+'cccc,                 
+,cccc,                 
+,cccc'                 
+,cccc'                 
+,cccc.                 
+,cc;,.                 
+.'..',;;;;;;;;'.       
+ .,:ccccccccccc,.      
+
