@@ -24,310 +24,49 @@ pub fn main() !void {
             continue;
         }
     }
-
-    // var timer = try std.time.Timer.start();
-    // var current_time = timer.read();
-    handleMinutes(l_flag * 60);
-    // switch (l_flag) {
-    //     0 => return std.debug.print("{s}\n", .{"Please provide a number in digits"}),
-    //     1...59 => blk: {
-    //         var current_time = l_flag;
-    //         for (0..l_flag) |_| {
-    //             if (current_time <= 9) continue;
-    //             std.time.sleep(100_000_000_0);
-    //             std.debug.print("\rCurrent time is: 00:{d}", .{current_time});
-    //             current_time -= 1;
-    //         }
-    //         if (current_time <= 9) {
-    //             for (0..l_flag) |_| {
-    //                 if (current_time <= 0) continue;
-    //                 std.time.sleep(100_000_000_0);
-    //                 std.debug.print("\rCurrent time is: 00:0{d}", .{current_time});
-    //                 current_time -= 1;
-    //             }
-    //             std.time.sleep(100_000_000_0);
-    //             break :blk std.debug.print("\rCurrent time is: 00:0{d}\n", .{0});
-    //         }
-    //         std.time.sleep(100_000_000_0);
-    //         break :blk std.debug.print("\rCurrent time is: 00:{d}\n", .{0});
-    //     },
-    //     else => std.debug.print("{s}\n", .{"An error occurred"}),
+    handleHours(l_flag);
+}
+pub fn handleHours(time: u8) void {
+    if (time / 60 == 0) {
+        handleMinutes(time);
+    }
+    // var current_hours: u8 = time;
+    // // make this a variable and remove if?
+    // if (time / 60 == 1) {
+    //     current_hours - 60;
+    //     handleMinutes(1, current_hours);
     // }
 }
 
-pub fn handleMinutes(converted_time: u8) void {
-    var displayed_time = converted_time;
+pub fn handleMinutes(time: u8) void {
     const print = std.debug.print;
-    while (displayed_time >= 0) {
-        if (displayed_time <= 9) {
-            for (0..displayed_time) |_| {
-                if (displayed_time <= 0) continue;
+    var current_time = time;
+    while (current_time != 0) {
+        var seconds: i16 = 59;
+        for (0..60) |_| {
+            if (current_time <= 1) blk: {
+                if (seconds <= 9) {
+                    std.time.sleep(100_000_000_0);
+                    print("\rCurrent time is: 00:0{d}", .{seconds});
+                    break :blk;
+                }
                 std.time.sleep(100_000_000_0);
-                std.debug.print("\rCurrent time is: 00:0{d}", .{displayed_time});
-                displayed_time -= 1;
+                print("\rCurrent time is: 00:{d}", .{seconds});
             }
-            std.time.sleep(100_000_000_0);
-            return std.debug.print("\rCurrent time is: 00:0{d}\n", .{0});
+            if (current_time > 1) blk: {
+                var display_time = current_time - 1;
+                if (seconds <= 9) {
+                    std.time.sleep(100_000_000_0);
+                    print("\rCurrent time is: {d}:0{d}", .{ display_time, seconds });
+                    break :blk;
+                }
+                std.time.sleep(100_000_000_0);
+                print("\rCurrent time is: {d}:{d}", .{ display_time, seconds });
+            }
+            seconds -= 1;
         }
-        // print("l_flag to nanoseconds: {d}\n", .{l_flag * 600_000_000_00});
-        std.time.sleep(100_000_000_0);
-        print("\rCurrent time is: 00:{d}", .{displayed_time});
-        displayed_time -= 1;
-        // }
+        if (current_time >= 1) {
+            current_time -= 1;
+        }
     }
 }
-
-// const one = [_]*const [7:0]u8{
-//     "   .;,.",
-//     " .':cc,",
-//     " 'cccc,",
-//     " ,cccc,",
-//     " ,cccc'",
-//     ".;cccc'",
-//     ".;cccc.",
-//     ".;ccc:.",
-//     " .';c:.",
-//     "    .. ",
-//     "    .. ",
-//     ".',;:;.",
-//     "'clcc:.",
-//     "'cccc;.",
-//     ",cccc;.",
-//     ",cccc,.",
-//     ",cccc,.",
-//     ",cccc, ",
-//     ",cccc' ",
-//     ".,cc:. ",
-//     "  .'.  ",
-// };
-//
-// const two = [_]*const [23:0]u8{
-//     "   ...''''''''....     ",
-//     "   .;ccccccccccc;..,,. ",
-//     "     ..',,,,,,,'.':cc;.",
-//     "                .:ccc:.",
-//     "                .cccc;.",
-//     "                'cccc;.",
-//     "                'cccc,.",
-//     "                ,cccc, ",
-//     "                ,cccc' ",
-//     "      ...........';cc' ",
-//     "   .';cccccccccc;'...  ",
-//     " ...'',;;;;::::;,'.    ",
-//     "'cc:,.                 ",
-//     "'cccc,                 ",
-//     ",cccc,                 ",
-//     ",cccc'                 ",
-//     ",cccc'                 ",
-//     ",cccc.                 ",
-//     ",cc;,.                 ",
-//     ".'..',;;;;;;;;'.       ",
-//     " .,:ccccccccccc,.      ",
-// };
-// pub const three = [_]*const [23:0]u8{
-//     " ..'''''''''.....    ",
-//     ".,:ccccccccccc:'.';. ",
-//     "  ..',,,,,,,,'..;ccc.",
-//     "              .;cccc.",
-//     "              .:ccc:.",
-//     "              .:ccc:.",
-//     "              .:ccc:.",
-//     "              .:ccc;.",
-//     "              .cccc;.",
-//     "   ............',:c, ",
-//     "..;:cccccccccc:,.... ",
-//     " .',;;;;;::::;;,'... ",
-//     "             ..,;:c, ",
-//     "             .;cccc, ",
-//     "             .;cccc, ",
-//     "             .;cccc' ",
-//     "             .;cccc' ",
-//     "             .:cccc. ",
-//     "             .;ccc:. ",
-//     " ..,;;;;;;;;;,..;cc;.",
-//     "';:ccccccccccc;..''. ",
-// };
-// const four = [_]*const [23:0]u8{
-//     "                  .;'. ",
-//     ".''..           .,ccc, ",
-//     ".:cc:,.         'cccc, ",
-//     ".:ccl;.         ,cccc, ",
-//     ".cccc;.        .,cccc' ",
-//     "'cccc,         .;cccc' ",
-//     ",cccc,         .;cccc. ",
-//     ",cccc'         .;ccc:. ",
-//     ",c:,'............,;c:. ",
-//     " ...,:ccccccccc:;'...  ",
-//     "   ..,;;;;;::::;,'...  ",
-//     "              ..';;:;. ",
-//     "               'cccc:. ",
-//     "               'cccc;. ",
-//     "               ,cccc;. ",
-//     "               ,cccc,  ",
-//     "               ,cccc,  ",
-//     "               ,cccc,  ",
-//     "               ,cccc'  ",
-//     "               .,cc:.  ",
-//     "                 .'.   ",
-// };
-// const five = [_]*const [23:0]u8{
-//     "  ...''''''''....      ",
-//     " .';ccccccccccc;.      ",
-//     ".'...'',,,,,,,'.       ",
-//     ",ccc;.                 ",
-//     ".;cccc.                ",
-//     ".;ccc:.                ",
-//     ".:ccc:.                ",
-//     ".:ccc;.                ",
-//     "'cccc,.                ",
-//     ".::;'...........       ",
-//     " ...';cccccccccc;'.    ",
-//     "   ..',;;;;;:::;,'...  ",
-//     "             . .',;::. ",
-//     "               .:cccc. ",
-//     "               .:ccc:. ",
-//     "               .cccc:. ",
-//     "               'cccc;. ",
-//     "               .cccc;. ",
-//     "  ...,;;;;;;;;'.':cc'  ",
-//     " .,:cccccccccc:,..'.   ",
-//     "   .............       ",
-// };
-// pub const six = [_]*const [23:0]u8{
-//     "   .'',,,,,''''''.     ",
-//     "  .';:cccccccccc,.     ",
-//     ".',....''''''''.       ",
-//     ".:ccc;.                ",
-//     ".:ccc:.                ",
-//     ".:ccc;.                ",
-//     "'cccc,.                ",
-//     "'cccc,                 ",
-//     ",cccc'                 ",
-//     "':;,...'''''''..       ",
-//     " ...;:cccccccccc;'.    ",
-//     ".....',,,;;;;;;,''...  ",
-//     ".;cc:,.         .,;:c:.",
-//     ".;cccc.         'cccc:.",
-//     ".;cccc.         'cccc;.",
-//     ".;ccc:.         'cccc;.",
-//     ".:ccc:.         ,cccc, ",
-//     ".:c:,..        .'cccc' ",
-//     "...',;::::::::'.,cc:.  ",
-//     " .,::::::::::::'....   ",
-//     "    ............       ",
-// };
-// pub const seven = [_]*const [23:0]u8{
-//     "..',,,,,''''''.     ",
-//     ".;:cccccccccc;..;;. ",
-//     "  ..''''''''..':cc:.",
-//     "             .:ccc:.",
-//     "             .cccc;.",
-//     "             'cccc;.",
-//     "             'cccc,.",
-//     "             'cccc, ",
-//     "             'cccc' ",
-//     "             ..,::. ",
-//     "                ..  ",
-//     "               .... ",
-//     "             ';:cc' ",
-//     "            .:cccc. ",
-//     "            .:ccc:. ",
-//     "            .:ccc:. ",
-//     "            .cccc:. ",
-//     "            'cccc;. ",
-//     "            .:ccc;. ",
-//     "             .:cc'  ",
-//     "              .'.   ",
-// };
-// pub const eight = [_]*const [23:0]u8{
-//     "   ..',,,,,,''''''..    ",
-//     "   .,:ccccccccccc:'.,;' ",
-//     " .,'...''''''''''..;ccc.",
-//     " 'ccc:'          .;cccc.",
-//     " 'cccc,          .;cccc.",
-//     " ,cccc'          .:ccc:.",
-//     ".;cccc'          .:ccc:.",
-//     ".;ccc:.          .:ccc;.",
-//     ".:ccc:.          .:ccc;.",
-//     ".;:;'...''''..''...,:c, ",
-//     "  ..';ccccccccccc:;'..  ",
-//     " .....,,,,;;;;;;;,''... ",
-//     ".:cc:'.          .,;:c, ",
-//     ".:ccc:.         .;cccc, ",
-//     ".cccc;.         .;cccc, ",
-//     ".cccc,.         .:cccc' ",
-//     "'cccc,          .:cccc. ",
-//     "'c:;,...        .;ccc:. ",
-//     "....',:::::::::;..;cc,. ",
-//     "  .;::::::::::::;....   ",
-//     "     ............       ",
-// };
-// pub const nine = [_]*const [23:0]u8{
-//     "    .',,,,,,''''''.    ",
-//     "   .';:cccccccccc,.';,.",
-//     " .',....''''''''..,ccc,",
-//     " .:ccc,.         'cccc,",
-//     " .:ccc;.         ,cccc,",
-//     " .cccc;.        .,cccc'",
-//     " 'cccc,         .;cccc.",
-//     " ,cccc'         .;cccc.",
-//     ".,cccc.         .;ccc:.",
-//     " ,:;,...'''''''...';c;.",
-//     "  ...,:cccccccccc;'... ",
-//     "    ..',,,;;;;;;,''... ",
-//     "                .,;:c:.",
-//     "                'cccc;.",
-//     "                'cccc;.",
-//     "                ,cccc, ",
-//     "               .,cccc, ",
-//     "               .,cccc' ",
-//     "   ..,;:::::::;'.,cc:. ",
-//     "  .,::::::::::::'....  ",
-//     "     ............      ",
-// };
-// pub const zero = [_]*const [23:0]u8{
-//     "    ..',,,,,''''''.     ",
-//     "   .';:cccccccccc;..;;. ",
-//     "  .,'...''''''''..':cc;.",
-//     " .,ccc;.         .:ccc;.",
-//     " .;cccc.         .cccc;.",
-//     " .:ccc:.         'cccc;.",
-//     " .:ccc:.         'cccc, ",
-//     " .cccc;.         ,cccc, ",
-//     " 'cccc,          ,cccc' ",
-//     " .::,..          ..,::. ",
-//     "  .                 ..  ",
-//     " ....              ...  ",
-//     " 'cc:;.         .';:cc. ",
-//     " ,cccc,         .:cccc. ",
-//     " ,cccc'         .:ccc:. ",
-//     " ,cccc'         .cccc:. ",
-//     ".,cccc.         'cccc;. ",
-//     ".;c:;'.         .:ccc;. ",
-//     " ...',;::::::::,.':c:'  ",
-//     "  .,;:::::::::::,..'.   ",
-//     "     ............       ",
-// };
-// const colon = [_]*const [7:0]u8{
-//     "       ",
-//     "       ",
-//     "       ",
-//     "       ",
-//     "       ",
-//     ".'''''.",
-//     "cccccc;",
-//     "',,,,,'",
-//     "       ",
-//     "       ",
-//     "       ",
-//     "       ",
-//     "       ",
-//     ".'''''.",
-//     "cccccc;",
-//     "',,,,,'",
-//     "       ",
-//     "       ",
-//     "       ",
-//     "       ",
-//     "       ",
-// };
