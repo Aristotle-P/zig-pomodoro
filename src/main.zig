@@ -26,6 +26,7 @@ pub fn main() !void {
     }
     try handleHours(l_flag);
 }
+
 pub fn handleHours(time: u16) !void {
     var hour_buf: [100]u8 = undefined;
     if (time < 60) {
@@ -50,8 +51,8 @@ pub fn handleHours(time: u16) !void {
 
 pub fn handleMinutes(minutes: u16, hours: [:0]u8) void {
     const print = std.debug.print;
-    var current_time: i8 = @intCast(minutes - 1);
-    if (current_time <= 1) {
+    var displayed_time: i8 = @intCast(minutes - 1);
+    if (minutes <= 1) {
         var seconds: i8 = 59;
         for (0..60) |_| blk: {
             if (seconds <= 9) {
@@ -65,34 +66,34 @@ pub fn handleMinutes(minutes: u16, hours: [:0]u8) void {
             seconds -= 1;
         }
     }
-    if (current_time > 1) {
+    if (minutes > 1) {
         for (0..minutes) |_| {
             var seconds: i8 = 59;
             for (0..60) |_| blk: {
                 if (seconds <= 9) {
-                    if (current_time <= 9) {
+                    if (displayed_time <= 9) {
                         std.time.sleep(100_000_000_0);
-                        print("\rCurrent time is: {s}:0{d}:0{d}", .{ hours, current_time, seconds });
+                        print("\rCurrent time is: {s}:0{d}:0{d}", .{ hours, displayed_time, seconds });
                         seconds -= 1;
                         break :blk;
                     }
                     std.time.sleep(100_000_000_0);
-                    print("\rCurrent time is: {s}:{d}:0{d}", .{ hours, current_time, seconds });
+                    print("\rCurrent time is: {s}:{d}:0{d}", .{ hours, displayed_time, seconds });
                     seconds -= 1;
                     break :blk;
                 }
-                if (current_time <= 9) {
+                if (displayed_time <= 9) {
                     std.time.sleep(100_000_000_0);
-                    print("\rCurrent time is: {s}:0{d}:{d}", .{ hours, current_time, seconds });
+                    print("\rCurrent time is: {s}:0{d}:{d}", .{ hours, displayed_time, seconds });
                     seconds -= 1;
                     break :blk;
                 }
                 std.time.sleep(100_000_000_0);
-                print("\rCurrent time is: {s}:{d}:{d}", .{ hours, current_time, seconds });
+                print("\rCurrent time is: {s}:{d}:{d}", .{ hours, displayed_time, seconds });
                 seconds -= 1;
             }
-            if (current_time >= 1) {
-                current_time -= 1;
+            if (displayed_time >= 1) {
+                displayed_time -= 1;
             }
         }
     }
