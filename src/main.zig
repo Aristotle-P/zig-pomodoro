@@ -24,49 +24,76 @@ pub fn main() !void {
             continue;
         }
     }
-    handleHours(l_flag);
+    try handleHours(l_flag);
 }
-pub fn handleHours(time: u8) void {
-    if (time / 60 == 0) {
-        handleMinutes(time);
+pub fn handleHours(time: u16) !void {
+    var hour_buf: [100]u8 = undefined;
+    if (time < 60) {
+        var hour_slice: [:0]u8 = try std.fmt.bufPrintZ(&hour_buf, "{s}", .{"00"});
+        return handleMinutes(time, hour_slice);
     }
-    // var current_hours: u8 = time;
-    // // make this a variable and remove if?
-    // if (time / 60 == 1) {
-    //     current_hours - 60;
-    //     handleMinutes(1, current_hours);
-    // }
+    var hours = time / 60;
+    var displayed_hours: i32 = @intCast(hours);
+    for (0..hours) |_| blk: {
+        displayed_hours -= 1;
+        if (hours >= 10) {
+            var hour_slice: [:0]u8 = try std.fmt.bufPrintZ(&hour_buf, "{d}", .{displayed_hours});
+            handleMinutes(60, hour_slice);
+            hours -= 1;
+            break :blk;
+        }
+        var hour_slice: [:0]u8 = try std.fmt.bufPrintZ(&hour_buf, "0{d}", .{displayed_hours});
+        handleMinutes(60, hour_slice);
+        hours -= 1;
+    }
 }
 
-pub fn handleMinutes(time: u8) void {
+pub fn handleMinutes(minutes: u16, hours: [:0]u8) void {
     const print = std.debug.print;
-    var current_time = time;
-    while (current_time != 0) {
-        var seconds: i16 = 59;
-        for (0..60) |_| {
-            if (current_time <= 1) blk: {
-                if (seconds <= 9) {
-                    std.time.sleep(100_000_000_0);
-                    print("\rCurrent time is: 00:0{d}", .{seconds});
-                    break :blk;
-                }
+    var current_time: i8 = @intCast(minutes - 1);
+    if (current_time <= 1) {
+        var seconds: i8 = 59;
+        for (0..60) |_| blk: {
+            if (seconds <= 9) {
                 std.time.sleep(100_000_000_0);
-                print("\rCurrent time is: 00:{d}", .{seconds});
+                print("\rCurrent time is: {s}:00:0{d}", .{ hours, seconds });
+                seconds -= 1;
+                break :blk;
             }
-            if (current_time > 1) blk: {
-                var display_time = current_time - 1;
-                if (seconds <= 9) {
-                    std.time.sleep(100_000_000_0);
-                    print("\rCurrent time is: {d}:0{d}", .{ display_time, seconds });
-                    break :blk;
-                }
-                std.time.sleep(100_000_000_0);
-                print("\rCurrent time is: {d}:{d}", .{ display_time, seconds });
-            }
+            std.time.sleep(100_000_000_0);
+            print("\rCurrent time is: {s}:00:{d}", .{ hours, seconds });
             seconds -= 1;
         }
-        if (current_time >= 1) {
-            current_time -= 1;
+    }
+    if (current_time > 1) {
+        for (0..minutes) |_| {
+            var seconds: i8 = 59;
+            for (0..60) |_| blk: {
+                if (seconds <= 9) {
+                    if (current_time <= 9) {
+                        std.time.sleep(100_000_000_0);
+                        print("\rCurrent time is: {s}:0{d}:0{d}", .{ hours, current_time, seconds });
+                        seconds -= 1;
+                        break :blk;
+                    }
+                    std.time.sleep(100_000_000_0);
+                    print("\rCurrent time is: {s}:{d}:0{d}", .{ hours, current_time, seconds });
+                    seconds -= 1;
+                    break :blk;
+                }
+                if (current_time <= 9) {
+                    std.time.sleep(100_000_000_0);
+                    print("\rCurrent time is: {s}:0{d}:{d}", .{ hours, current_time, seconds });
+                    seconds -= 1;
+                    break :blk;
+                }
+                std.time.sleep(100_000_000_0);
+                print("\rCurrent time is: {s}:{d}:{d}", .{ hours, current_time, seconds });
+                seconds -= 1;
+            }
+            if (current_time >= 1) {
+                current_time -= 1;
+            }
         }
     }
 }
