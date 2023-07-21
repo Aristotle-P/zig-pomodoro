@@ -51,7 +51,6 @@ pub fn handleHours(time: u16) !void {
 
 pub fn handleMinutes(minutes: u16, hours: [:0]u8) void {
     const print = std.debug.print;
-    var displayed_time: i8 = @intCast(minutes - 1);
     if (minutes <= 1) {
         var seconds: i8 = 59;
         for (0..60) |_| blk: {
@@ -67,33 +66,34 @@ pub fn handleMinutes(minutes: u16, hours: [:0]u8) void {
         }
     }
     if (minutes > 1) {
+        var display_mins: i8 = @intCast(minutes - 1);
         for (0..minutes) |_| {
             var seconds: i8 = 59;
             for (0..60) |_| blk: {
                 if (seconds <= 9) {
-                    if (displayed_time <= 9) {
+                    if (display_mins <= 9) {
                         std.time.sleep(100_000_000_0);
-                        print("\rCurrent time is: {s}:0{d}:0{d}", .{ hours, displayed_time, seconds });
+                        print("\rCurrent time is: {s}:0{d}:0{d}", .{ hours, display_mins, seconds });
                         seconds -= 1;
                         break :blk;
                     }
                     std.time.sleep(100_000_000_0);
-                    print("\rCurrent time is: {s}:{d}:0{d}", .{ hours, displayed_time, seconds });
+                    print("\rCurrent time is: {s}:{d}:0{d}", .{ hours, display_mins, seconds });
                     seconds -= 1;
                     break :blk;
                 }
-                if (displayed_time <= 9) {
+                if (display_mins <= 9) {
                     std.time.sleep(100_000_000_0);
-                    print("\rCurrent time is: {s}:0{d}:{d}", .{ hours, displayed_time, seconds });
+                    print("\rCurrent time is: {s}:0{d}:{d}", .{ hours, display_mins, seconds });
                     seconds -= 1;
                     break :blk;
                 }
                 std.time.sleep(100_000_000_0);
-                print("\rCurrent time is: {s}:{d}:{d}", .{ hours, displayed_time, seconds });
+                print("\rCurrent time is: {s}:{d}:{d}", .{ hours, display_mins, seconds });
                 seconds -= 1;
             }
-            if (displayed_time >= 1) {
-                displayed_time -= 1;
+            if (display_mins >= 1) {
+                display_mins -= 1;
             }
         }
     }
