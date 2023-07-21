@@ -24,7 +24,27 @@ pub fn main() !void {
             continue;
         }
     }
-    try handleHours(l_flag);
+    try startTimers(l_flag, s_flag);
+}
+
+pub fn startTimers(long: u8, short: u8) !void {
+    try handleHours(long);
+    const stdout = std.io.getStdOut();
+    const stdin = std.io.getStdIn();
+
+    var hour_buf: [100]u8 = undefined;
+    var hour_slice: [:0]u8 = try std.fmt.bufPrintZ(&hour_buf, "{s}", .{"\nTimer over! Start your break? y/n\n"});
+    try stdout.writeAll(hour_slice);
+
+    var buffer: [100]u8 = undefined;
+    const input = (try nextLine(stdin.reader(), &buffer)).?;
+    if (std.mem.eql(u8, input, "y") == true) {
+        try handleHours(short);
+    }
+    if (std.mem.eql(u8, input, "n") == true) {
+        try stdout.writeAll("Goodbye");
+    }
+    return;
 }
 
 pub fn handleHours(time: u16) !void {
@@ -96,5 +116,18 @@ pub fn handleMinutes(minutes: u16, hours: [:0]u8) void {
                 display_mins -= 1;
             }
         }
+    }
+}
+
+fn nextLine(reader: anytype, buffer: []u8) !?[]const u8 {
+    var line = (try reader.readUntilDelimiterOrEof(
+        buffer,
+        '\n',
+    )) orelse return null;
+    // trim annoying windows-only carriage return character
+    if (@import("builtin").os.tag == .windows) {
+        return std.mem.trimRight(u8, line, "\r");
+    } else {
+        return line;
     }
 }
