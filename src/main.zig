@@ -63,7 +63,7 @@ pub fn handleStrings(hours: u8, minutes: u16, seconds: u8) !void {
 }
 
 pub fn handleMinutes(minutes: u16, hours: u8) void {
-    var display_mins: u16 = @intCast(minutes - 1);
+    var display_mins: u16 = minutes - 1;
     for (0..minutes) |_| {
         var seconds: u8 = 59;
         for (0..59) |_| {
