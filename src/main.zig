@@ -32,9 +32,9 @@ pub fn startTimers(long: u8, short: u8) !void {
     const stdout = std.io.getStdOut();
     const stdin = std.io.getStdIn();
 
-    var hour_buf: [100]u8 = undefined;
-    var hour_slice: [:0]u8 = try std.fmt.bufPrintZ(&hour_buf, "{s}", .{"\nTimer over! Start your break? y/n\n"});
-    try stdout.writeAll(hour_slice);
+    var break_buf: [100]u8 = undefined;
+    var break_slice: [:0]u8 = try std.fmt.bufPrintZ(&break_buf, "{s}", .{"\nTimer over! Start your break? y/n\n"});
+    try stdout.writeAll(break_slice);
 
     var buffer: [100]u8 = undefined;
     const input = (try nextLine(stdin.reader(), &buffer)).?;
@@ -42,80 +42,53 @@ pub fn startTimers(long: u8, short: u8) !void {
         try handleHours(short);
     }
     if (std.mem.eql(u8, input, "n") == true) {
-        try stdout.writeAll("Goodbye");
+        var goodbye_buf: [100]u8 = undefined;
+        var goodbye_slice: [:0]u8 = try std.fmt.bufPrintZ(&goodbye_buf, "{s}", .{"Goodbye!\n"});
+        try stdout.writeAll(goodbye_slice);
     }
     return;
 }
 
-pub fn handleHours(time: u16) !void {
-    var hour_buf: [100]u8 = undefined;
-    if (time < 60) {
-        var hour_slice: [:0]u8 = try std.fmt.bufPrintZ(&hour_buf, "{s}", .{"00"});
-        return handleMinutes(time, hour_slice);
-    }
-    var hours = time / 60;
-    var displayed_hours: i32 = @intCast(hours);
-    for (0..hours) |_| blk: {
-        displayed_hours -= 1;
-        if (hours >= 10) {
-            var hour_slice: [:0]u8 = try std.fmt.bufPrintZ(&hour_buf, "{d}", .{displayed_hours});
-            handleMinutes(60, hour_slice);
-            hours -= 1;
-            break :blk;
+pub fn handleStrings(hours: u8, minutes: u16, seconds: u8) !void {
+    var hour_buf: [20]u8 = undefined;
+    const hour_formatter = std.fmt.formatIntBuf(&hour_buf, @as(u8, hours), 10, .lower, .{ .fill = '0', .width = 2 });
+
+    var minute_buf: [20]u8 = undefined;
+    const minute_formatter = std.fmt.formatIntBuf(&minute_buf, @as(u16, minutes), 10, .lower, .{ .fill = '0', .width = 2 });
+
+    var second_buf: [20]u8 = undefined;
+    const second_formatter = std.fmt.formatIntBuf(&second_buf, @as(u8, seconds), 10, .lower, .{ .fill = '0', .width = 2 });
+
+    std.debug.print("\r{s}:{s}:{s}", .{ hour_buf[0..hour_formatter], minute_buf[0..minute_formatter], second_buf[0..second_formatter] });
+}
+
+pub fn handleMinutes(minutes: u16, hours: u8) void {
+    var display_mins: u16 = @intCast(minutes - 1);
+    for (0..minutes) |_| {
+        var seconds: u8 = 59;
+        for (0..59) |_| {
+            std.time.sleep(100_000_000_0);
+            try handleStrings(hours, display_mins, seconds);
+            seconds -= 1;
         }
-        var hour_slice: [:0]u8 = try std.fmt.bufPrintZ(&hour_buf, "0{d}", .{displayed_hours});
-        handleMinutes(60, hour_slice);
-        hours -= 1;
+        std.time.sleep(100_000_000_0);
+        try handleStrings(hours, display_mins, 0);
+        if (display_mins >= 1) {
+            display_mins -= 1;
+        }
     }
 }
 
-pub fn handleMinutes(minutes: u16, hours: [:0]u8) void {
-    const print = std.debug.print;
-    if (minutes <= 1) {
-        var seconds: i8 = 59;
-        for (0..60) |_| blk: {
-            if (seconds <= 9) {
-                std.time.sleep(100_000_000_0);
-                print("\rCurrent time is: {s}:00:0{d}", .{ hours, seconds });
-                seconds -= 1;
-                break :blk;
-            }
-            std.time.sleep(100_000_000_0);
-            print("\rCurrent time is: {s}:00:{d}", .{ hours, seconds });
-            seconds -= 1;
-        }
+pub fn handleHours(time: u16) !void {
+    if (time < 60) {
+        return handleMinutes(time, 0);
     }
-    if (minutes > 1) {
-        var display_mins: i8 = @intCast(minutes - 1);
-        for (0..minutes) |_| {
-            var seconds: i8 = 59;
-            for (0..60) |_| blk: {
-                if (seconds <= 9) {
-                    if (display_mins <= 9) {
-                        std.time.sleep(100_000_000_0);
-                        print("\rCurrent time is: {s}:0{d}:0{d}", .{ hours, display_mins, seconds });
-                        seconds -= 1;
-                        break :blk;
-                    }
-                    std.time.sleep(100_000_000_0);
-                    print("\rCurrent time is: {s}:{d}:0{d}", .{ hours, display_mins, seconds });
-                    seconds -= 1;
-                    break :blk;
-                }
-                if (display_mins <= 9) {
-                    std.time.sleep(100_000_000_0);
-                    print("\rCurrent time is: {s}:0{d}:{d}", .{ hours, display_mins, seconds });
-                    seconds -= 1;
-                    break :blk;
-                }
-                std.time.sleep(100_000_000_0);
-                print("\rCurrent time is: {s}:{d}:{d}", .{ hours, display_mins, seconds });
-                seconds -= 1;
-            }
-            if (display_mins >= 1) {
-                display_mins -= 1;
-            }
-        }
+    var hours = time / 60;
+    var displayed_hours: u8 = @intCast(hours);
+    for (0..hours) |_| {
+        displayed_hours -= 1;
+        handleMinutes(60, displayed_hours);
+        hours -= 1;
     }
 }
 
@@ -124,7 +97,6 @@ fn nextLine(reader: anytype, buffer: []u8) !?[]const u8 {
         buffer,
         '\n',
     )) orelse return null;
-    // trim annoying windows-only carriage return character
     if (@import("builtin").os.tag == .windows) {
         return std.mem.trimRight(u8, line, "\r");
     } else {
